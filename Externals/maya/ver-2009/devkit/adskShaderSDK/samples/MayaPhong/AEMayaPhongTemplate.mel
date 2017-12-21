@@ -1,0 +1,38 @@
+// ==========================================================================
+// Copyright 2008 Autodesk, Inc. All rights reserved.
+//
+// Use of this software is subject to the terms of the Autodesk
+// license agreement provided at the time of installation or download,
+// or which otherwise accompanies this software in either electronic
+// or hard copy form.
+// ==========================================================================
+
+//
+// AE Template file for MayaPhong
+//
+
+global proc AEMayaPhongTemplate ( string $nodeName )
+{
+	AEswatchDisplay $nodeName;
+	editorTemplate -beginScrollLayout;
+		editorTemplate -beginLayout "Common Material Attributes" -collapse 0;
+			editorTemplate -addControl "color";
+			editorTemplate -addControl "transparency";
+			editorTemplate -addControl "ambientColor";
+			editorTemplate -addControl "incandescence";
+			editorTemplate -addControl "diffuse";
+			editorTemplate -addControl "translucence";
+			editorTemplate -addControl "translucenceDepth";
+			editorTemplate -addControl "translucenceFocus";
+		editorTemplate -endLayout;
+
+		editorTemplate -beginLayout "Specular Shading" -collapse 0;
+			editorTemplate -addControl "cosinePower";
+			editorTemplate -addControl "specularColor";
+			editorTemplate -addControl "reflectivity";
+			editorTemplate -addControl "reflectedColor";
+		editorTemplate -endLayout;
+
+		editorTemplate -addExtraControls;
+	editorTemplate -endScrollLayout;
+}

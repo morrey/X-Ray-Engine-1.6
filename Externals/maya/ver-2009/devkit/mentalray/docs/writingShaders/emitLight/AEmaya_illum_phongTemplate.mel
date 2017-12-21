@@ -1,0 +1,23 @@
+
+//
+// AE Template file for maya_illum_phong
+//
+global proc AEmaya_illum_phongTemplate ( string $nodeName ) 
+{ 
+	editorTemplate -beginScrollLayout; 
+
+	editorTemplate -beginLayout "maya_illum_phong Attributes" -collapse 0 ;
+		editorTemplate -addControl "ambience";
+		editorTemplate -addControl "ambient";
+		editorTemplate -addControl "diffuse";
+		editorTemplate -addControl "specular";
+		editorTemplate -addControl "exponent";
+		editorTemplate -addControl "mode";
+		editorTemplate -addControl "lights";
+	editorTemplate -endLayout;	
+
+	editorTemplate -endScrollLayout;
+
+	editorTemplate -suppress "caching"; 
+	editorTemplate -suppress "nodeState"; 
+}  

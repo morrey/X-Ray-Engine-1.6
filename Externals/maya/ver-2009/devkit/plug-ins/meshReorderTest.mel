@@ -1,0 +1,61 @@
+//-
+// ==========================================================================
+// Copyright 1995,2006,2008 Autodesk, Inc. All rights reserved.
+//
+// Use of this software is subject to the terms of the Autodesk
+// license agreement provided at the time of installation or download,
+// or which otherwise accompanies this software in either electronic
+// or hard copy form.
+// ==========================================================================
+//+
+
+////////////////////////////////////////////////////////////////////////
+// 
+// meshReorderTest.mel
+// 
+// Description:
+//    Simple test to verify the logic in meshReorder command is correct
+// 
+////////////////////////////////////////////////////////////////////////
+
+global proc meshReorderTest()
+{
+	file -f -new;
+
+	polyPlane -w 1 -h 1 -sx 10 -sy 10 -ax 0 1 0 -tx 1 -ch 1;
+	delete -ch;
+
+	select -r pPlane1.vtx[0] ;
+	delete;
+
+	polySubdivideEdge -ws 0 -s 0 -dv 1 -ch 1 pPlane1.e[0];
+
+
+	select -cl;
+	meshReorder pPlane1.vtx[19] pPlane1.vtx[8] pPlane1.vtx[9];
+	select "polySurface1";
+	move 0 0 2;
+
+	polyPlane -w 1 -h 1 -sx 10 -sy 10 -ax 0 1 0 -tx 1 -ch 1;
+	move -2 0 0;
+	delete -ch;
+
+	select -cl;
+	meshReorder pPlane2.vtx[20] pPlane2.vtx[9] pPlane2.vtx[10];
+	select "polySurface2";
+	move 0 0 2;
+
+	// Create a blendshape from the newly ordered shapes, 
+	// It'll be nice and oderly
+
+	select "polySurface1" "polySurface2";
+	blendShape -frontOfChain;
+	setAttr "blendShape1.polySurface1" .5;
+
+	// Create a blendshape from the original shapes, 
+	// It'll be a mess
+
+	select "pPlane1" "pPlane2";
+	blendShape -frontOfChain;
+	setAttr "blendShape2.pPlane1" .5;
+}

@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(SolutionDir)ConfigurationDefs.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" Condition="'$(Platform)'=='Win32'">
+    <xrPlatform>Win32</xrPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="UserMacros" Condition="'$(Platform)'=='x86'">
+    <xrPlatform>Win32</xrPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="UserMacros" Condition="'$(Platform)'=='x64'">
+    <xrPlatform>Win64</xrPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="UserMacros" Condition="'$(xrPlatform)'==''">
+    <xrPlatform>$(Platform)</xrPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="UserMacros">
+    <xrBinRootDir>$(SolutionDir)..\bin\</xrBinRootDir>
+    <xrLibRootDir>$(SolutionDir)..\lib\</xrLibRootDir>
+    <xrBinDir>$(SolutionDir)..\bin\$(xrPlatform)\$(Configuration)\</xrBinDir>
+    <xrPlugBinDir>$(SolutionDir)..\bin\$(xrPlatform)\$(Configuration)\plugins\</xrPlugBinDir>
+    <xrLibDir>$(SolutionDir)..\lib\$(xrPlatform)\$(Configuration)\</xrLibDir>
+    <xrIntDir>$(SolutionDir)..\intermediate\$(xrPlatform)\$(Configuration)\</xrIntDir>
+    <xrSdkDir>$(SolutionDir)..\sdk\</xrSdkDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationType)'=='Application'">
+    <OutDir>$(xrBinDir)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationType)'=='DynamicLibrary'">
+    <OutDir>$(xrBinDir)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationType)'=='StaticLibrary'">
+    <OutDir>$(xrLibDir)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationType)'=='Makefile'">
+    <OutDir>$(xrLibDir)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IntDir>$(xrIntDir)$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(xrSdkDir)include;$(SolutionDir)Externals;$(DXSDK_DIR)Include;$(SolutionDir)Externals\luajit\src;$(SolutionDir)Externals\luabind;$(SolutionDir)Externals\GameSpy\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <!--
+        4251 : class 'x' needs to have dll-interface to be used by clients of class 'y'
+        4275 : non dll-interface class 'x' used as base for dll-interface class 'y' 
+        4458 : declaration of 'x' hides class member
+      -->
+      <DisableSpecificWarnings>4251;4275;4458</DisableSpecificWarnings>
+      <!--
+        LUABIND_DYNAMIC_LINK : self-explanatory
+        MSVC;dSINGLE;WIN32 : for ODE
+        _SECURE_SCL=0;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE : temporary workaround for deprecated API
+      -->
+      <PreprocessorDefinitions>LUABIND_DYNAMIC_LINK;MSVC;dSINGLE;WIN32;_SECURE_SCL=0;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(xrSdkDir)libraries;$(xrLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>$(xrLibDir)$(TargetName).lib</ImportLibrary>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(xrSdkDir)libraries;$(xrLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(xrLibDir)$(TargetName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+</Project>

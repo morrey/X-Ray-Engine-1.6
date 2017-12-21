@@ -1,0 +1,90 @@
+# ==========================================================================
+# Copyright 2008 Autodesk, Inc. All rights reserved.
+#
+# Use of this software is subject to the terms of the Autodesk
+# license agreement provided at the time of installation or download,
+# or which otherwise accompanies this software in either electronic
+# or hard copy form.
+# ==========================================================================
+
+min version "3.6.0"
+max version "3.7.99"
+
+declare shader
+    # Return struct
+    struct {
+        color           "outColor",
+        color           "outGlowColor",
+        color           "outMatteOpacity",
+        color           "outTransparency",
+        # BRDF components
+        color           "outAmbient",
+        color           "outIncandescence",
+        color           "outIrradiance",
+        color           "outDiffuseShadowed",
+        color           "outDiffuseNoShadow",
+        color           "outShadow",
+        color           "outSpecularShadowed",
+        color           "outSpecularNoShadow",
+        color           "outReflection",
+        color           "outRefraction",
+        color           "outScatter",
+        color           "outOpacity"
+    }
+    "MayaPhong" (
+        # Render Pass Parameters
+        integer         "FrameBufferWriteOperation" default 1, # add
+        integer         "FrameBufferWriteFlags" default 0, # no flags
+        scalar          "FrameBufferWriteFactor" default 1.0,
+        # Inherited from Base Material
+        color           "color", #: default .5, .5, .5, 1.
+        color           "transparency", 
+        # Inherited from Matte Material
+        integer         "matteOpacityMode", #: default 1
+        scalar          "matteOpacity",
+        # Inherited from Glow Material
+        scalar          "glowIntensity",
+        # Inherited from Lambertian Material
+        integer         "refractionLimit", #: default 6
+        scalar          "refractiveIndex", #: default 1
+        boolean         "refractions",
+        scalar          "diffuse", #: default .8
+        color           "ambientColor",
+        color           "incandescence",
+        scalar          "translucence",
+        scalar          "translucenceFocus",
+        scalar          "translucenceDepth",
+        scalar          "opacityGain",
+        boolean         "hideSource",
+        scalar          "surfaceThickness",
+        scalar          "shadowAttenuation",
+        scalar          "transparencyDepth",
+        scalar          "lightAbsorbance",
+        boolean         "chromaticAberration",
+        vector          "normalCamera",
+        color           "irradiance",
+        color           "irradianceColor",
+        scalar          "refractionBlur", #: default 0
+        integer         "refractionBlurLimit",
+        integer         "refractionRays", #: default 1
+        color           "scatterColor",
+        scalar          "scatterRadius",
+        integer         "scatterAccuracy",
+        integer         "scatterFalloff",
+        integer         "scatterLimit",
+        integer         "scatterCache",
+        # Inherited from Reflective Material
+        integer         "reflectionLimit", #: default 1
+        color           "specularColor", #: default .5, .5, .5, 1.
+        color           "reflectedColor",
+        scalar          "reflectivity", #: default .5
+        scalar          "reflectionSpecularity", #: default 1
+        scalar          "reflectionBlur",
+        scalar          "reflectionBlurLimit",
+        integer         "reflectionRays",
+        # MayaPhong parameters
+        scalar          "cosinePower" #: softmin 0 softmax 100 default 20
+    )
+    version 1
+    apply material
+end declare

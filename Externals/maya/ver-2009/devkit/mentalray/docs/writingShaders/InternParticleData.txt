@@ -1,0 +1,303 @@
+/*
+// Copyright (C) 1997-2008 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+*/
+
+	=========================
+	mental ray for Maya 10.0
+
+	     documentation of
+	   mental ray user data
+	storing Maya particle data
+	=========================
+
+Contents:
+
+	1. Overview
+	2. Particle User Data
+	    2.1. User Data Header
+	    2.2. User Data Body
+
+1. Overview
+
+	mental ray does not support particle rendering natively,
+	and it does not provide a dedicated scene entity type to
+	store point cloud data. However, mental ray for Maya does
+	support rendering of Maya particles, which is performed
+	by specialized shaders in the mayabase package. For this
+	to work, the particle data need to be available to those
+	shaders. To support sharing of the data on multi-processor
+	machines and automatic network transfer it is preferable
+	to store the data in the mental ray scene database, the
+	entity of choice is 'user data' (type name 'data').
+
+
+2. Particle User Data
+
+	To represent a large chunk of data with arbitrary and
+	dynamic layout and superior performance the user data
+	type 'raw' is utilized. It is an opaque data structure
+	for mental ray, and no further manipulation of the data
+	is done by mental ray (in contrast to 'declared' user data
+	with automatic byte swapping during network communication
+	between machines of different byte order).
+
+	Such user data entities can be referenced and accessed by
+	any shader through the database handle, typically provided
+	as a shader parameter. Upon access, a pointer to a memory
+	block is returned. Decoding of the particle data and potential
+	swapping needs to be performed in the shader with the help
+	of the following description.
+
+
+2.1. User Data Header
+
+	| Note: the following information is provided 'as is' 
+	| for the current version of the software. The data
+	| structure and the related code pieces are subject
+	| to change in future versions of the product.
+
+	The following data structure is always fully written to the
+	user data as a fixed 'header'. The actual particle data is
+	appended to the end of the header, in exactly the same order
+	as the corresponding fields are listed in the header, like
+	radius first, position next and so on. Further details about
+	type and length of specific particle properties are provided
+	in the related fields 'offset' and 'length' in the header.
+
+	The next section lists the actual C data structure.
+
+----------------------------------------------------------------------------
+
+/* Particle System user data layout. */
+
+typedef struct _particle_system {
+
+	unsigned int	magic;           /* 0x4d617961 ('Maya')           */
+
+	char		version[4];      /* 2 0 0 1 (no motion blur)      */
+					 /* 2 1 0 1 (with motion blur)    */
+
+	unsigned int	constantOne;     /* 1 (set by the creator, to
+					       detect swapping needs)     */
+
+	unsigned int	particleType;    /* ParticleType enum (see below) */
+	unsigned int	particleCount;   /* number of per-particle data   */
+	unsigned int	radiusOffset;
+	unsigned int	radiusLength;
+	unsigned int	positionOffset;
+	unsigned int	positionLength;
+	unsigned int	radius0Offset;
+	unsigned int	radius0Length;
+	unsigned int	position0Offset;
+	unsigned int	position0Length;
+	unsigned int	radius1Offset;
+	unsigned int	radius1Length;
+	unsigned int	position1Offset;
+	unsigned int	position1Length;
+	unsigned int	ageOffset;
+	unsigned int	ageLength;
+	unsigned int	lifespanOffset;
+	unsigned int	lifespanLength;
+	unsigned int	colorOffset;
+	unsigned int	colorLength;
+	unsigned int	opacityOffset;
+	unsigned int	opacityLength;
+	unsigned int	incandescenceOffset;
+	unsigned int	incandescenceLength;
+	unsigned int	motionRadiusOffset;
+	unsigned int	motionRadiusLength;
+	unsigned int	motionPositionOffset;
+	unsigned int	motionPositionLength;
+	unsigned int	motionRadius0Offset;
+	unsigned int	motionRadius0Length;
+	unsigned int	motionPosition0Offset;
+	unsigned int	motionPosition0Length;
+	unsigned int	motionRadius1Offset;
+	unsigned int	motionRadius1Length;
+	unsigned int	motionPosition1Offset;
+	unsigned int	motionPosition1Length;
+	unsigned int	motionAgeOffset;
+	unsigned int	motionAgeLength;
+	unsigned int	motionLifespanOffset;
+	unsigned int	motionLifespanLength;
+	unsigned int	motionColorOffset;
+	unsigned int	motionColorLength;
+	unsigned int	motionOpacityOffset;
+	unsigned int	motionOpacityLength;
+	unsigned int	motionIncandescenceOffset;
+	unsigned int	motionIncandescenceLength;
+} ParticleSystem;
+
+/* Particle types. */
+
+typedef enum {
+	PARTICLETYPE_BLOBBY,
+	PARTICLETYPE_CLOUD,
+	PARTICLETYPE_TUBE
+} ParticleType;
+
+
+2.2. User Data Body
+
+	| Since the smallest byte size of any particle data item is
+	| 4 byte (32bit integer, or single-precision floating point)
+	| all the offset and length values are given as referencing
+	| integer values, counts, or pointers. In other words, an
+	| 'offset' value of 1 means an actual byte offset of 4, and
+	| a 'length' of 3 means 3*4 = 12 bytes.
+
+	The fields:
+
+	offset - stores the offset from the beginning of the header
+		 to the first data item in the data block,
+
+	length - stores the number of elements per particle data entry,
+		 like 1 for single 'integer' and 'floating-point' value,
+		 2 for texture coordinate UV values, and 3 for 'color'
+		 values with RGB components. (Note, this value is not
+		 considering the overall particle count, which has its
+		 own field in the header.)
+
+	If 'length' is set to zero then there are no per-particle data
+	provided for this property but just a single constant value
+	(pointed to by 'offset') that will apply to all particles.
+
+	The next section lists some convenient macros to access the
+	individual values by index number.
+
+
+/* Particle system access macros. */
+
+#define PS_COUNT(ps) \
+	((ps)->particleCount)
+
+#define PS_RADIUS(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->radiusOffset + \
+			(ps)->radiusLength*(id)))
+
+#define PS_POSITION(ps, id) \
+	((miVector *)(((unsigned int *)(ps)) + \
+			(ps)->positionOffset + \
+			(ps)->positionLength*(id)))
+
+#define PS_RADIUS0(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->radius0Offset + \
+			(ps)->radius0Length*(id)))
+
+#define PS_POSITION0(ps, id) \
+	((miVector *)(((unsigned int *)(ps)) + \
+			(ps)->position0Offset + \
+			(ps)->position0Length*(id)))
+
+#define PS_RADIUS1(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->radius1Offset + \
+			(ps)->radius1Length*(id)))
+
+#define PS_POSITION1(ps, id) \
+	((miVector *)(((unsigned int *)(ps)) + \
+			(ps)->position1Offset + \
+			(ps)->position1Length*(id)))
+
+#define PS_AGE(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->ageOffset + \
+			(ps)->ageLength*(id)))
+
+#define PS_LIFESPAN(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->lifespanOffset + \
+			(ps)->lifespanLength*(id)))
+
+#define PS_COLOR(ps, id) \
+	((miColor *)(((unsigned int *)(ps)) + \
+			(ps)->colorOffset + \
+			(ps)->colorLength*(id)))
+
+#define PS_OPACITY(ps, id) \
+	(*(float *)(((unsigned int *) (ps)) + \
+			(ps)->opacityOffset + \
+			(ps)->opacityLength*(id)))
+
+#define PS_INCANDESCENCE(ps, id) \
+	((miColor *)(((unsigned int *)(ps)) + \
+			(ps)->incandescenceOffset + \
+			(ps)->incandescenceLength*(id)))
+
+#define PS_MOTIONRADIUS(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->motionRadiusOffset + \
+			(ps)->motionRadiusLength*(id)))
+
+#define PS_MOTIONPOSITION(ps, id) \
+	((miVector *)(((unsigned int *)(ps)) + \
+			(ps)->motionPositionOffset + \
+			(ps)->motionPositionLength*(id)))
+
+#define PS_MOTIONRADIUS0(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->motionRadius0Offset + \
+			(ps)->motionRadius0Length*(id)))
+
+#define PS_MOTIONPOSITION0(ps, id) \
+	((miVector *)(((unsigned int *)(ps)) + \
+			(ps)->motionPosition0Offset + \
+			(ps)->motionPosition0Length*(id)))
+
+#define PS_MOTIONRADIUS1(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->motionRadius1Offset + \
+			(ps)->motionRadius1Length*(id)))
+
+#define PS_MOTIONPOSITION1(ps, id) \
+	((miVector *)(((unsigned int *)(ps)) + \
+			(ps)->motionPosition1Offset + \
+			(ps)->motionPosition1Length*(id)))
+
+#define PS_MOTIONAGE(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->motionAgeOffset + \
+			(ps)->motionAgeLength*(id)))
+
+#define PS_MOTIONLIFESPAN(ps, id) \
+	(*(float *)(((unsigned int *)(ps)) + \
+			(ps)->motionLifespanOffset + \
+			(ps)->motionLifespanLength*(id)))
+
+#define PS_MOTIONCOLOR(ps, id) \
+	((miColor *)(((unsigned int *)(ps)) + \
+			(ps)->motionColorOffset + \
+			(ps)->motionColorLength*(id)))
+
+#define PS_MOTIONOPACITY(ps, id) \
+	(*(float *)(((unsigned int *) (ps)) + \
+			(ps)->motionOpacityOffset + \
+			(ps)->motionOpacityLength*(id)))
+
+#define PS_MOTIONINCANDESCENCE(ps, id) \
+	((miColor *)(((unsigned int *)(ps)) + \
+			(ps)->motionIncandescenceOffset + \
+			(ps)->motionIncandescenceLength*(id)))
+
+----------------------------------------------------------------------------

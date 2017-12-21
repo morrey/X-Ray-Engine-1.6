@@ -1,0 +1,37 @@
+//-
+// ==========================================================================
+// Copyright 1995,2006,2008 Autodesk, Inc. All rights reserved.
+//
+// Use of this software is subject to the terms of the Autodesk
+// license agreement provided at the time of installation or download,
+// or which otherwise accompanies this software in either electronic
+// or hard copy form.
+// ==========================================================================
+//+
+
+//
+// Load the plug-in and create a mesh shape
+//
+loadPlugin apiMeshShape;
+createNode apiMesh; 
+createNode apiMeshCreator;
+connectAttr apiMeshCreator1.outputSurface apiMesh1.inputSurface ;
+
+//
+// Marking menu handler that will be invoked from
+// dagMenuProc.mel
+//
+global proc apiMeshDagMenuProc( string $parent, string $child )
+{
+	setParent -m $parent;
+
+	string $cmd = "hide " + $child;
+	menuItem -l "Hide" -rp "N" -c $cmd;
+
+	$cmd = "boundingBoxDisplayCtrl(1,\"\");";
+	menuItem -l "Show bounding box" -rp "W" -c $cmd;
+
+	$cmd = "boundingBoxDisplayCtrl(0,\"\");";
+	menuItem -l "Hide bounding box" -rp "E" -c $cmd;
+}
+

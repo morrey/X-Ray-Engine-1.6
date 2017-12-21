@@ -1,0 +1,132 @@
+/*
+// Copyright (C) 1997-2008 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+*/
+
+	===========================
+	  mental ray for Maya 10.0
+
+	     example to access
+	particle data in mental ray
+	===========================
+
+
+This document provides a complete example that
+accesses particle user data and prints some values.
+This information is provided as is and is not
+guarenteed to work across versions of Maya. The
+structure of the particle user data block is
+subject to change.
+
+
+--- particleinfo.mi ---
+
+declare shader
+        "particleinfo" (
+                geometry        "particleData"
+                )
+        version 1
+end declare
+
+--- particleinfo.c ---
+
+#include <shader.h>
+#include "particle.h"     /* provides particle user data layout,
+                             see InternParticleData.txt */
+
+typedef struct {
+        miTag   particleData;
+} Parms;
+
+DLLEXPORT int particleinfo_version(void) { return 1; }
+
+DLLEXPORT miBoolean particleinfo(
+        miColor         *result,
+        miState         *state,
+        Parms           *parms)
+{
+        miTag userTag = (miTag) *mi_eval_tag(&parms->particleData);
+        miUserdata *userPtr = mi_db_access(userTag);
+        if (userPtr) {
+                int i, count = 0;
+
+                ParticleSystem *ps = (ParticleSystem*)(userPtr->parameters);
+
+                /* check that we use Maya data with right endian */
+                if (ps->magic != 0x4D617961) {
+                        mi_db_unpin(userTag);
+                        return miFALSE;
+                        }
+
+                /* access fields */
+                
+                count = PS_COUNT(ps);
+                
+                mi_info("particle count: %d", count);
+                
+                for (i=0; i < count; i++) { 
+                        miScalar radius   = (miScalar)  PS_RADIUS(ps, i);
+                        miVector position = (miVector) *PS_POSITION(ps, i);
+                        miScalar age      = (miScalar)  PS_AGE(ps, i);
+                        
+                        mi_info("radius %f, position %f %f %f, age %f",
+                                radius,
+                                position.x, position.y, position.z,
+                                age);
+                        }
+                
+                mi_db_unpin(userTag);
+                }
+        
+        return miTRUE;
+}
+
+---
+
+
+To use this example, a common particle scene should be exported
+to an .mi file, and manipulated as follows:
+
+
+Search for the particle user block and remember its name, like
+
+---
+
+data "particleShape1:ptdata"
+        7216 [
+        '4d617961020000010000000100000001000001270000001b0000000100000142'
+	...
+
+---
+
+Add a call to the example shader at the end of the .mi file,
+supplying the actual name of the particle data, like
+
+---
+...
+render ":MayaTranslatedWorld" "persp" "miDefaultOptions"
+
+call "particleinfo" ("particleSystem" "particleShape1:ptdata")
+
+---
+
+
+Render.

@@ -1,0 +1,35 @@
+// ==========================================================================
+// Copyright 2008 Autodesk, Inc. All rights reserved.
+//
+// Use of this software is subject to the terms of the Autodesk
+// license agreement provided at the time of installation or download,
+// or which otherwise accompanies this software in either electronic
+// or hard copy form.
+// ==========================================================================
+
+//
+// AE Template file for CustomPhong
+//
+
+global proc AECustomPhongTemplate ( string $nodeName )
+{
+	AEswatchDisplay $nodeName;
+
+	editorTemplate -beginScrollLayout; 
+
+	editorTemplate -beginLayout "CustomPhong Attributes" -collapse 0 ;
+		editorTemplate -addControl "ambience";
+		editorTemplate -addControl "ambient";
+		editorTemplate -addControl "diffuse";
+		editorTemplate -addControl "specular";
+		editorTemplate -addControl "exponent";
+	editorTemplate -endLayout;	
+
+	editorTemplate -endScrollLayout;
+
+	editorTemplate -suppress "caching"; 
+	editorTemplate -suppress "nodeState";
+	editorTemplate -suppress "FrameBufferWriteOperation";
+	editorTemplate -suppress "FrameBufferWriteFlags";
+	editorTemplate -suppress "FrameBufferWriteFactor";
+}

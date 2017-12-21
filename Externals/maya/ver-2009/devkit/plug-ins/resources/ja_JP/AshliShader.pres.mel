@@ -1,0 +1,53 @@
+// Copyright (C) 1997-2006 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+// Resources for Plug-in: AshliShader
+// 
+// ----------------------------
+// Registered string resources:
+// ----------------------------
+setPluginResource( "AshliShader", "rGLSLShaderNodeAshliFailedFindExtensions", "Ashli シェーダは必要な拡張子を見つけられませんでした");
+setPluginResource( "AshliShader", "rGLSLShaderNodeFailedAddAttribute", "アトリビュート ^1s を追加できませんでした");
+setPluginResource( "AshliShader", "rGLSLShaderNodeFailedDestroyAttribute", "アトリビュート ^1s を破棄できませんでした");
+setPluginResource( "AshliShader", "rGLSLShaderNodeFailedLoadShader", "シェーダをロードできませんでした");
+setPluginResource( "AshliShader", "rGLSLShaderNodeFailedResourceContext", "リソース コンテキストをカレントにできませんでした: ");
+// 
+// --------------------------
+// Registered node resources:
+// --------------------------
+// 
+// Node: AshliShader
+// 
+setNodeNiceNameResource( "AshliShader", "Ashli シェーダ" );
+setAttrNiceNameResource( "AshliShader", "s", "シェーダ" );
+setAttrNiceNameResource( "AshliShader", "t", "テクニック" );
+setAttrNiceNameResource( "AshliShader", "tl", "テクニック リスト" );
+setAttrNiceNameResource( "AshliShader", "sp", "シェーダ パス" );
+setAttrNiceNameResource( "AshliShader", "t0", "テクスチャ座標 0" );
+setAttrNiceNameResource( "AshliShader", "t1", "テクスチャ座標 1" );
+setAttrNiceNameResource( "AshliShader", "t2", "テクスチャ座標 2" );
+setAttrNiceNameResource( "AshliShader", "t3", "テクスチャ座標 3" );
+setAttrNiceNameResource( "AshliShader", "t4", "テクスチャ座標 4" );
+setAttrNiceNameResource( "AshliShader", "t5", "テクスチャ座標 5" );
+setAttrNiceNameResource( "AshliShader", "t6", "テクスチャ座標 6" );
+setAttrNiceNameResource( "AshliShader", "t7", "テクスチャ座標 7" );
+setAttrNiceNameResource( "AshliShader", "c0", "カラー 0" );
+setAttrNiceNameResource( "AshliShader", "c1", "カラー 1" );

@@ -1,0 +1,29 @@
+# ==========================================================================
+# Copyright 2008 Autodesk, Inc. All rights reserved.
+#
+# Use of this software is subject to the terms of the Autodesk
+# license agreement provided at the time of installation or download,
+# or which otherwise accompanies this software in either electronic
+# or hard copy form.
+# ==========================================================================
+
+min version "3.7.0"
+max version "3.7.99"
+
+declare shader
+	"CustomPhong" (
+		# Render Pass Parameters
+		integer			"FrameBufferWriteOperation" default 1, # add
+		integer			"FrameBufferWriteFlags" default 0, # no flags
+		scalar			"FrameBufferWriteFactor" default 1.0,
+		# CustomPhong Parameters
+		color			"ambience",	#: default .2, .2, .2, 1.
+		color			"ambient",	#: default .5, .5, .5, 1.
+		color 			"diffuse",	#: default .7, .7, .7, 1.
+		color 			"specular",	#: default .5, .5, .5, 1.
+		scalar			"exponent",	# phong exponent
+									#: softmin 0 softmax 100 default 50		
+	)
+	version 1
+	apply material
+end declare

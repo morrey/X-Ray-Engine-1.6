@@ -1,0 +1,2 @@
+..\bin\x64\luajit.exe:
+  msvcbuild.bat x64

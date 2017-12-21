@@ -1,0 +1,34 @@
+
+// AE Template file for maya_light_point
+//
+
+global proc AEmaya_light_pointTemplate ( string $nodeName ) 
+{ 
+
+	editorTemplate -beginScrollLayout; 
+
+	// mib light attributes
+	editorTemplate -beginLayout "mib_light_point Attributes" -collapse 0 ;
+		editorTemplate -label "Color"         -addControl "color";
+		editorTemplate -label "Shadow"        -addControl "shadow"
+				"AEmentalrayLightUpdateFactor";
+		editorTemplate -label "Factor"        -addControl "factor";
+		editorTemplate -label "Attenuation"   -addControl "atten"
+				"AEmentalrayLightUpdateAtten";
+		editorTemplate -label "Start"         -addControl "start";
+		editorTemplate -label "Stop"          -addControl "stop";
+	editorTemplate -endLayout;
+
+	// maya light attributes
+	editorTemplate -beginLayout "Maya Light Attributes" -collapse 0 ;
+		editorTemplate -beginNoOptimize;
+		editorTemplate -label "Emit Diffuse"	-addControl "emitDiffuse";
+		editorTemplate -label "Emit Specular"	-addControl "emitSpecular";
+		editorTemplate -endNoOptimize;
+	editorTemplate -endLayout;
+	
+	editorTemplate -endScrollLayout;
+	
+	editorTemplate -suppress "caching"; 
+	editorTemplate -suppress "nodeState"; 
+}  
