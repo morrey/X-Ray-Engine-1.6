@@ -601,6 +601,7 @@ void CCar::detach_Actor()
     if (!Owner())
         return;
     Owner()->setVisible(1);
+	if (OwnerActor()) OwnerActor()->SetActorShadows(!psActorFlags.test(AF_ACTOR_BODY));
     CHolderCustom::detach_Actor();
     PPhysicsShell()->remove_ObjectContactCallback(ActorObstacleCallback);
     NeutralDrive();

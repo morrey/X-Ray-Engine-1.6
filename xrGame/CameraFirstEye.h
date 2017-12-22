@@ -10,6 +10,8 @@ class CCameraFirstEye : public CCameraBase
     bool lookat_active;
     void UpdateLookat();
 
+	static Fvector m_cam_offset;
+
 public:
     CCameraFirstEye(IGameObject* p, u32 flags = 0);
     virtual ~CCameraFirstEye();

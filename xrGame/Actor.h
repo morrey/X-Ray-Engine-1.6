@@ -583,6 +583,18 @@ public:
     virtual void ChangeVisual(shared_str NewVisual);
     virtual void OnChangeVisual();
 
+	//Functions for actor legs and actor shadows 			#+# SkyLoader
+	virtual	shared_str		GetDefaultVisualOutfit_legs() const { return m_DefaultVisualOutfit_legs; };
+	virtual	void			SetDefaultVisualOutfit_legs(shared_str DefaultOutfit) { m_DefaultVisualOutfit_legs = DefaultOutfit; };
+	virtual	void			SetDrawLegs(bool DrawLegs) { m_bDrawLegs = DrawLegs; };
+	virtual bool			DrawLegs() const { return m_bDrawLegs; }
+	virtual	void			SetActorShadows(bool ActorShadows) { m_bActorShadows = ActorShadows; };
+	virtual bool			IsActorShadowsOn() const { return m_bActorShadows; }
+	virtual bool			IsFirstEye() const { return (m_bFirstEye); }
+	virtual bool			IsLookAt() const { return (eacLookAt == cam_active); }
+	virtual bool			CanBeDrawLegs() const { return (m_bCanBeDrawLegs); }
+	//
+
     virtual void RenderIndicator(Fvector dpos, float r1, float r2, const ui_shader& IndShader);
     virtual void RenderText(LPCSTR Text, Fvector dpos, float* pdup, u32 color);
 
@@ -600,14 +612,19 @@ private:
     /////////////////////////////////////////
     // DEBUG INFO
 protected:
-    CStatGraph* pStatGraph;
+	CStatGraph				*pStatGraph;
 
-    shared_str m_DefaultVisualOutfit;
+	shared_str				m_DefaultVisualOutfit;
+	shared_str				m_DefaultVisualOutfit_legs;
+	bool					m_bDrawLegs;
+	bool					m_bFirstEye;
+	bool					m_bCanBeDrawLegs;
+	bool					m_bActorShadows;
 
-    LPCSTR invincibility_fire_shield_3rd;
-    LPCSTR invincibility_fire_shield_1st;
-    shared_str m_sHeadShotParticle;
-    u32 last_hit_frame;
+	LPCSTR					invincibility_fire_shield_3rd;
+	LPCSTR					invincibility_fire_shield_1st;
+	shared_str				m_sHeadShotParticle;
+	u32						last_hit_frame;
 #ifdef DEBUG
     friend class CLevelGraph;
 #endif

@@ -21,7 +21,7 @@ extern bool shared_str_initialized;
 #pragma comment(lib, "EToolsB.lib")
 #define USE_BUG_TRAP
 #else
-//#define USE_BUG_TRAP
+#define USE_BUG_TRAP
 static BOOL bException = FALSE;
 #endif
 

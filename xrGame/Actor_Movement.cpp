@@ -471,16 +471,21 @@ bool CActor::g_LadderOrient()
 void CActor::g_cl_Orientate(u32 mstate_rl, float dt)
 {
     // capture camera into torso (only for FirstEye & LookAt cameras)
-    if (eacFreeLook != cam_active)
-    {
-        r_torso.yaw = cam_Active()->GetWorldYaw();
-        r_torso.pitch = cam_Active()->GetWorldPitch();
-    }
-    else
-    {
-        r_torso.yaw = cam_FirstEye()->GetWorldYaw();
-        r_torso.pitch = cam_FirstEye()->GetWorldPitch();
-    }
+	if (eacLookAt == cam_active)
+	{
+		r_torso.yaw = cam_Active()->GetWorldYaw();
+		r_torso.pitch = cam_Active()->GetWorldPitch();
+	}
+	else if (eacFreeLook == cam_active || m_bActorShadows)
+	{
+		r_torso.yaw = cam_FirstEye()->GetWorldYaw();
+		r_torso.pitch = cam_FirstEye()->GetWorldPitch();
+	}
+	else
+	{
+		r_torso.yaw = cam_FirstEye()->GetWorldYaw();
+		r_torso.pitch = 0;
+	}
 
     unaffected_r_torso.yaw = r_torso.yaw;
     unaffected_r_torso.pitch = r_torso.pitch;

@@ -392,7 +392,7 @@ void CActor::g_SetAnimation(u32 mstate_rl)
     else
         is_standing = true;
 
-    if (mstate_rl & mcSprint)
+    if (mstate_rl & mcSprint && m_bActorShadows)
     {
         g_SetSprintAnimation(mstate_rl, M_head, M_torso, M_legs);
         moving_idx = STorsoWpn::eSprint;
@@ -448,6 +448,12 @@ void CActor::g_SetAnimation(u32 mstate_rl)
             }
             else
             {
+				if (!m_bActorShadows)
+				{
+					M_torso = ST->m_torso_idle;
+					m_bAnimTorsoPlayed = TRUE;
+				}
+
                 if (!m_bAnimTorsoPlayed)
                 {
                     if (W)
@@ -572,6 +578,9 @@ void CActor::g_SetAnimation(u32 mstate_rl)
     if (!M_head)
         M_head = ST->m_head_idle;
 
+	if (!m_bActorShadows) 
+		M_head = ST->m_head_idle;
+	
     if (!M_torso)
     {
         if (m_bAnimTorsoPlayed)

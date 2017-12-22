@@ -8,13 +8,15 @@
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-
+Fvector CCameraFirstEye::m_cam_offset;
 CCameraFirstEye::CCameraFirstEye(IGameObject* p, u32 flags) : CCameraBase(p, flags), lookat_active(false) {}
 CCameraFirstEye::~CCameraFirstEye() {}
 void CCameraFirstEye::Load(LPCSTR section)
 {
     inherited::Load(section);
     style = csFirstEye;
+
+	m_cam_offset = pSettings->r_fvector3(section, "offset");
 }
 
 void CCameraFirstEye::UpdateLookat()
@@ -41,6 +43,7 @@ void CCameraFirstEye::UpdateLookat()
     pitch = angle_inertion_var(pitch, xyz.x, 1.0f, PI, PI, Device.fTimeDelta);
 }
 
+#include "Actor.h"
 void CCameraFirstEye::Update(Fvector& point, Fvector& noise_dangle)
 {
     vPosition.set(point);
@@ -64,6 +67,28 @@ void CCameraFirstEye::Update(Fvector& point, Fvector& noise_dangle)
 
     vDirection.set(mR.k);
     vNormal.set(mR.j);
+
+	///////////////////////////////////////////////////
+	if (!Actor()->IsActorShadowsOn())
+	{
+		Fmatrix							a_xform;
+		a_xform.setXYZ(0, -yaw, 0);
+		a_xform.translate_over(point);
+		Fvector _off = m_cam_offset;
+		a_xform.transform_tiny(_off);
+		vPosition.set(_off);
+
+		Fvector				vDir;
+		collide::rq_result	rR;
+
+		float				covariance = VIEWPORT_NEAR * 6.f;
+		vDir.invert(vDirection);
+		g_pGameLevel->ObjectSpace.RayPick(_off, vDir, 1.1f + covariance, collide::rqtBoth, rR, parent);
+
+		vPosition.mul(vDirection, VIEWPORT_NEAR);
+		vPosition.add(_off);
+	}
+	///////////////////////////////////////////////////
 
     if (m_Flags.is(flRelativeLink))
     {

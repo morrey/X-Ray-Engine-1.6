@@ -111,7 +111,7 @@ CActor::CActor() : CEntityAlive(), current_ik_cam_shift(0)
     }
     else
     {
-        cameras[eacLookAt] = new CCameraLook(this);
+        cameras[eacLookAt] = new CCameraLook2(this);
         cameras[eacLookAt]->Load("actor_look_cam");
     }
     cameras[eacFreeLook] = new CCameraLook(this);
@@ -395,9 +395,9 @@ void CActor::Load(LPCSTR section)
                 pSettings->r_string(section, "heavy_danger_snd"), st_Effect, SOUND_TYPE_MONSTER_INJURING);
         }
     }
-    if (psActorFlags.test(AF_PSP))
+    /*if (psActorFlags.test(AF_PSP))
         cam_Set(eacLookAt);
-    else
+    else*/
         cam_Set(eacFirstEye);
 
     // sheduler
@@ -415,8 +415,19 @@ void CActor::Load(LPCSTR section)
     m_fDispCrouchFactor = pSettings->r_float(section, "disp_crouch_factor");
     m_fDispCrouchNoAccelFactor = pSettings->r_float(section, "disp_crouch_no_acc_factor");
 
-    LPCSTR default_outfit = READ_IF_EXISTS(pSettings, r_string, section, "default_outfit", 0);
-    SetDefaultVisualOutfit(default_outfit);
+	//morrey 
+	m_bActorShadows = (psActorFlags.test(AF_ACTOR_BODY)) ? false : true;
+
+	LPCSTR default_outfit = READ_IF_EXISTS(pSettings, r_string, section, "default_outfit", 0);
+	SetDefaultVisualOutfit(default_outfit);
+		
+	m_bCanBeDrawLegs = psActorFlags.test(AF_ACTOR_BODY) ? true : false;
+	
+	if (IsGameTypeSingle() && CanBeDrawLegs())
+		m_bDrawLegs = true;
+	else
+		m_bDrawLegs = false;
+	//morrey 
 
     invincibility_fire_shield_1st = READ_IF_EXISTS(pSettings, r_string, section, "Invincibility_Shield_1st", 0);
     invincibility_fire_shield_3rd = READ_IF_EXISTS(pSettings, r_string, section, "Invincibility_Shield_3rd", 0);
@@ -896,20 +907,20 @@ float g_fov = 55.0f;
 
 float CActor::currentFOV()
 {
-    if (!psHUD_Flags.is(HUD_WEAPON | HUD_WEAPON_RT | HUD_WEAPON_RT2))
-        return g_fov;
+	if (!psHUD_Flags.is(HUD_WEAPON | HUD_WEAPON_RT | HUD_WEAPON_RT2))
+		return g_fov;
 
-    CWeapon* pWeapon = smart_cast<CWeapon*>(inventory().ActiveItem());
+	CWeapon* pWeapon = smart_cast<CWeapon*>(inventory().ActiveItem());
 
-    if (eacFirstEye == cam_active && pWeapon && pWeapon->IsZoomed() &&
-        (!pWeapon->ZoomTexture() || (!pWeapon->IsRotatingToZoom() && pWeapon->ZoomTexture())))
-    {
-        return pWeapon->GetZoomFactor() * (0.75f);
-    }
-    else
-    {
-        return g_fov;
-    }
+	if (eacFirstEye == cam_active && pWeapon && pWeapon->IsZoomed() &&
+		(!pWeapon->ZoomTexture() || (!pWeapon->IsRotatingToZoom() && pWeapon->ZoomTexture())))
+	{
+		return pWeapon->GetZoomFactor() * (0.75f);
+	}
+	else
+	{
+		return g_fov;
+	}
 }
 
 void CActor::UpdateCL()
@@ -991,15 +1002,15 @@ void CActor::UpdateCL()
             HUD().SetFirstBulletCrosshairDisp(pWeapon->GetFirstBulletDisp());
 #endif
 
-            BOOL B = !((mstate_real & mcLookout) && !IsGameTypeSingle());
+			if (eacLookAt == cam_active) {
+				psHUD_Flags.set(HUD_CROSSHAIR_RT2, true);
+				psHUD_Flags.set(HUD_DRAW_RT, true);
+			}
+			else {
+				psHUD_Flags.set(HUD_CROSSHAIR_RT2, pWeapon->show_crosshair());
+				psHUD_Flags.set(HUD_DRAW_RT, pWeapon->show_indicators());
+			}
 
-            psHUD_Flags.set(HUD_WEAPON_RT, B);
-
-            B = B && pWeapon->show_crosshair();
-
-            psHUD_Flags.set(HUD_CROSSHAIR_RT2, B);
-
-            psHUD_Flags.set(HUD_DRAW_RT, pWeapon->show_indicators());
         }
     }
     else
@@ -1273,9 +1284,29 @@ void CActor::shedule_Update(u32 DT)
             m_DangerSnd.stop();
     }
 
+	if ((m_bActorShadows == (bool)psActorFlags.test(AF_ACTOR_BODY)) && g_Alive() && !m_holder)
+	{
+		m_bActorShadows  = psActorFlags.test(AF_ACTOR_BODY) ? false : true;
+		m_bCanBeDrawLegs = psActorFlags.test(AF_ACTOR_BODY) ? true : false;
+
+		if (IsGameTypeSingle() && CanBeDrawLegs())
+			m_bDrawLegs = true;
+		else
+			m_bDrawLegs = false;
+
+		if (eacFirstEye == cam_active) //reset visual
+		{
+			cam_Set(eacLookAt);
+			cam_Set(eacFirstEye);
+		}
+	}
+
     //если в режиме HUD, то сама модель актера не рисуется
-    if (!character_physics_support()->IsRemoved())
-        setVisible(!HUDview());
+	if (!character_physics_support()->IsRemoved())
+		if (m_bDrawLegs && IsGameTypeSingle() && ((!psDeviceFlags.test(rsR2) && !psDeviceFlags.test(rsR3) && !psDeviceFlags.test(rsR4) && !m_bActorShadows) || ((psDeviceFlags.test(rsR2) || psDeviceFlags.test(rsR3) || psDeviceFlags.test(rsR4)) && m_bActorShadows)))
+			setVisible(TRUE);
+		else
+			setVisible(!HUDview() || m_bCanBeDrawLegs);
 
     //что актер видит перед собой
     collide::rq_result& RQ = HUD().GetCurrentRayQuery();
@@ -1360,7 +1391,7 @@ void CActor::renderable_Render()
 {
     VERIFY(_valid(XFORM()));
     inherited::renderable_Render();
-    if (1 /*!HUDview()*/)
+    if (!HUDview() || (m_bActorShadows && m_bFirstEye))
     {
         CInventoryOwner::renderable_Render();
     }
@@ -1369,7 +1400,7 @@ void CActor::renderable_Render()
 
 BOOL CActor::renderable_ShadowGenerate()
 {
-    if (m_holder)
+    if (m_holder || (!m_bActorShadows && m_bFirstEye))
         return FALSE;
 
     return inherited::renderable_ShadowGenerate();

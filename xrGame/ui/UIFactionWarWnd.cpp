@@ -19,6 +19,7 @@
 #include "UICharacterInfo.h"
 
 #include "Actor.h"
+#include "Pda.h"
 #include "ai_space.h"
 #include "xrScriptEngine/script_engine.hpp"
 

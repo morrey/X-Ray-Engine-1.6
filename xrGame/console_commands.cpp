@@ -1939,6 +1939,8 @@ void CCC_RegisterCommands()
 #endif // MASTER_GOLD
 
     CMD3(CCC_Mask, "g_autopickup", &psActorFlags, AF_AUTOPICKUP);
+	//morrey  
+	CMD3(CCC_Mask, "g_actor_body", &psActorFlags, AF_ACTOR_BODY);
     CMD3(CCC_Mask, "g_dynamic_music", &psActorFlags, AF_DYNAMIC_MUSIC);
     CMD3(CCC_Mask, "g_important_save", &psActorFlags, AF_IMPORTANT_SAVE);
 

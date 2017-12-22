@@ -4,7 +4,7 @@
 #ifdef DEBUG
 #include "PHDebug.h"
 #endif
-#include "hit.h"
+#include "Hit.h"
 #include "PHDestroyable.h"
 #include "Car.h"
 
@@ -20,8 +20,8 @@
 #include "EffectorShot.h"
 
 #include "PHMovementControl.h"
-#include "xrPhysics/ielevatorstate.h"
-#include "xrPhysics/actorcameracollision.h"
+#include "xrPhysics/IElevatorState.h"
+#include "xrPhysics/ActorCameraCollision.h"
 #include "IKLimbsController.h"
 #include "GamePersistent.h"
 
@@ -35,6 +35,12 @@ void CActor::cam_Set(EActorCameras style)
 float CActor::f_Ladder_cam_limit = 1.f;
 void CActor::cam_SetLadder()
 {
+	if (CanBeDrawLegs() && !m_bActorShadows)
+	{
+		setVisible(FALSE);
+		m_bDrawLegs = false;
+	}
+
     CCameraBase* C = cameras[eacFirstEye];
     g_LadderOrient();
     float yaw = (-XFORM().k.getH());
@@ -89,6 +95,12 @@ void CActor::camUpdateLadder(float dt)
 
 void CActor::cam_UnsetLadder()
 {
+	if (CanBeDrawLegs() && !m_bActorShadows)
+	{
+		setVisible(TRUE);
+		m_bDrawLegs = true;
+	}
+
     CCameraBase* C = cameras[eacFirstEye];
     C->lim_yaw[0] = 0;
     C->lim_yaw[1] = 0;
@@ -367,7 +379,7 @@ void CActor::cam_Update(float dt, float fFOV)
     {
         collide_camera(*cameras[eacFirstEye], _viewport_near, this);
     }
-    if (psActorFlags.test(AF_PSP))
+    if (psActorFlags.test(AF_PSP) && eacFreeLook != cam_active)
     {
         Cameras().UpdateFromCamera(C);
     }
@@ -390,7 +402,7 @@ void CActor::cam_Update(float dt, float fFOV)
     if (Level().CurrentEntity() == this)
     {
         Level().Cameras().UpdateFromCamera(C);
-        if (eacFirstEye == cam_active && !Level().Cameras().GetCamEffector(cefDemo))
+        if ((eacFirstEye == cam_active || eacLookAt == cam_active) && !Level().Cameras().GetCamEffector(cefDemo))
         {
             Cameras().ApplyDevice(_viewport_near);
         }
@@ -404,7 +416,12 @@ void CActor::update_camera(CCameraShotEffector* effector)
         return;
     //	if (Level().CurrentViewEntity() != this) return;
 
-    CCameraBase* pACam = cam_FirstEye();
+	CCameraBase* pACam = NULL;
+	if (eacLookAt == cam_active)
+		pACam = cam_Active();
+	else
+		pACam = cam_FirstEye();
+
     if (!pACam)
         return;
 
